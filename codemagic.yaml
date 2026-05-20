@@ -1,28 +1,29 @@
-# مستند إعدادات البناء التلقائي لتطبيق الأندرويد في Codemagic
 workflows:
   android-workflow:
     name: Android Simple Calculator Workflow
-    instance_type: mac_mini_m1 # أو linux حسب المتوفر في الحساب المجاني
+    instance_type: mac_mini_m1
     max_build_duration: 30
     environment:
       groups:
-        -   # يمكنك إضافة متغيرات البيئة هنا لاحقاً إذا احتجت
+        - default_group
       vars:
-        XCODE_WORKSPACE: "SimpleCalculator.xcworkspace" 
-        XCODE_SCHEME: "SimpleCalculator"
+        JAVA_VERSION: "17"
       ndk: latest
-      java: 17 # إصدار الجافا المتوافق مع تطبيقات أندرويد الحديثة (Compose)
+      java: 17
     triggering:
       events:
         - push
-      branches:
-        - main # تأكد إذا كان اسم الفرع عندك main أو master
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
     scripts:
       - name: Set up local.properties
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
       - name: Build Android APK
         script: |
+          chmod +x gradlew
           ./gradlew assembleDebug
     artifacts:
-      - app/build/outputs/apk/**/*.apk # هذا السطر يضمن لك ظهور ملف الـ APK للتحميل بعد انتهاء البناء
+      - app/build/outputs/apk/**/*.apk
